@@ -1,0 +1,41 @@
+//转账以太币 和 转账普通的代币coin（ERC20标准）：
+pragma solidity ^0.4.22;
+contract transferMoney {
+    address public owner;
+    constructor () public payable {
+    }
+    function ownable() public {
+        owner = msg.sender;
+    }
+    mapping (address => uint256) balances;
+    
+    function ownerEtherBalance() constant returns(uint256) {
+        return msg.sender.balance ;  //use ethereum API to get the account/user coin（not ether)
+    }
+    
+    function ownerCoinBalance() constant returns(uint256) {  
+        return balances[owner] ;  //not use ethereum API, use the contract constructor to get the account/user coin（not ether）
+    }    
+    function contractBalance() constant returns(uint256) {
+        return this.balance;  //use ethereum API to get the contract ether,metion :if you use the API to transferMoney,the money must be ether.
+    }
+    
+    function msgValue() constant returns(uint256) {
+        return msg.value ;  //  
+    }
+    
+    function SetTransfer(address _addr1, uint256 _acount1, address _addr2, uint256 _acount2) public{
+        balances[tx.origin] = 10000;   //define the transaction basecoin
+        require(balances[owner] >= (_acount1 + _acount2));
+        balances[_addr1] += _acount1;   //transfer some coin to _addr1 from owner
+        balances[_addr2] += _acount2;   //transfer some coin to _addr2 from owner
+        _addr1.transfer(1. ether);      //transfer some ether to _addr1 from owner
+        _addr2.transfer(1. ether);      //transfer some ether to _addr2 from owner
+    }
+    function getEtherBalance(address _addr) view returns(uint256) {
+        return _addr.balance;    //get _addr's ether balance
+    }
+    function getCoinBalances(address _addr) view returns(uint256) {
+        return balances[_addr];  //get addr's coin balance
+    }
+}
