@@ -1,0 +1,45 @@
+//call 和delegatecall的使用和区别：
+pragma solidity ^0.4.22;
+
+contract seller {
+    uint public n;
+    address public sender;
+
+    function sellThing(uint _n) payable{ //if this function need to call to be paied ,the function should add the "payable"
+        require (_n == 1 ether);  //the item on sell value 1 ether;check the value the buyer wether is 1 ether;true go on ,not return false;
+        sender = msg.sender;   //check the msg.sender is whose address
+    }
+
+    event logdata(bytes data);
+
+    function () public payable {  
+        emit logdata(msg.data);
+    }
+
+    function getBalance() public view returns (uint) {
+        return this.balance;
+    }
+}
+
+contract buyer {
+    uint public n;
+    address public sender;
+
+    // 只是调用代码，合约环境还是当前合约。
+    function buySomethings1(address _e, uint _n) {
+        bytes4 methodId = bytes4(keccak256("sellThing(uint256)"));  // the message sended by this transfer transation
+        require(_e.delegatecall(methodId, _n));  //declar that：the function "_e_e.delegatecall(methodId, _n"must be implement true,than premit to go on 
+    }
+
+  function buySomethings2(address _e, uint _n) { //call the "buyer"contract's "setN"function to pay some value/gas/send some message from this function.
+        bytes4 methodId = bytes4(keccak256("sellThing(uint256)"));
+        require(_e.call.gas(1000).value(1 ether)(methodId, _n));// the "require"here is the same mean to the "seller"function
+        // _e.call.gas(1000)(methodId, _n);
+        // _e.call.gas(1000).value(1 ether)(methodId, _n);
+  }
+
+  function callNoFunc(address addr) returns (bool){
+      return addr.call("tinyxiong", 1234);
+  }
+
+}
